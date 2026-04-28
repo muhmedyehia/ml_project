@@ -1,9 +1,12 @@
 import streamlit as st
 import pandas as pd
 
+if "data" not in st.session_state:
+    st.session_state["data"] = None
+
 st.set_page_config(page_title="ML Project", layout="wide")
 
-st.title("📂 File Upload")
+st.title("📁 File Upload")
 
 uploaded_file = st.file_uploader("Upload your dataset", type=["csv", "xlsx"])
 
@@ -15,13 +18,19 @@ if uploaded_file is not None:
             df = pd.read_excel(uploaded_file)
 
         st.session_state["data"] = df
+        st.session_state["filename"] = uploaded_file.name
 
         st.success(f"✅ File '{uploaded_file.name}' uploaded successfully!")
 
         st.subheader("Data Preview")
         st.dataframe(df.head(10))
 
-        st.write(f"Shape: {df.shape[0]} rows × {df.shape[1]} columns")
+        st.write(f"Shape: {df.shape[0]} rows x {df.shape[1]} columns")
+
+        st.subheader("Quick Info")
+        st.write(f"Missing Values: {df.isnull().sum().sum()}")
+        st.dataframe(df.dtypes.rename("Type").reset_index())
+        st.dataframe(df.describe())
 
     except Exception as e:
         st.error(f"❌ Error reading file: {e}")
